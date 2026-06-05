@@ -9,7 +9,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#EDEBE8;font-family:'IBM Plex Mono','Menlo','Courier New',monospace;-webkit-font-smoothing:antialiased}
 
-.stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(96vw,170.67vh);height:min(96vh,53.97vw);aspect-ratio:3393/1908;background:#F7F2ED;border-radius:42px;overflow:hidden;box-shadow:0 4px 60px rgba(0,0,0,0.07)}
+.stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(96vw,170.67svh,170.67vh);height:min(calc(var(--vh,1vh)*96),96svh,96vh,53.97vw);aspect-ratio:3393/1908;background:#F7F2ED;border-radius:42px;overflow:hidden;box-shadow:0 4px 60px rgba(0,0,0,0.07)}
 
 .slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .5s ease,transform .5s ease;background:#F7F2ED;transform:translateY(30px)}
 .slide.active{opacity:1;pointer-events:all;transform:translateY(0)}
@@ -59,6 +59,69 @@ html,body{width:100%;height:100%;overflow:hidden;background:#EDEBE8;font-family:
 .rotate-msg.show{display:flex}
 .rotate-inner{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
 .rotate-inner p{font-size:14px;color:#282828;letter-spacing:0.08em;line-height:1.6}
+
+/* Zoom icon */
+.zoom-btn{
+  position:absolute;bottom:14px;right:14px;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(247,242,237,0.9);
+  border:1px solid rgba(40,40,40,0.1);
+  cursor:pointer;z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,transform .2s,box-shadow .2s;
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.zoom-btn:hover{background:#fff;transform:scale(1.08)}
+.zoom-btn svg{width:15px;height:15px;stroke:#282828;stroke-width:2;fill:none;pointer-events:none}
+
+/* Lightbox */
+.lightbox{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease,background .3s ease;
+}
+.lightbox.open{
+  opacity:1;pointer-events:all;
+  background:rgba(0,0,0,0.92);
+}
+.lightbox img{
+  max-width:96vw;max-height:96svh;max-height:96vh;
+  object-fit:contain;border-radius:8px;
+  transform:scale(0.92);
+  transition:transform .35s cubic-bezier(0.2,0.8,0.3,1);
+}
+.lightbox.open img{transform:scale(1)}
+.lightbox-close{
+  position:fixed;top:20px;right:24px;
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,0.6);font-size:28px;
+  line-height:1;transition:color .2s;z-index:10000;
+}
+.lightbox-close:hover{color:#fff}
+
+/* Application slide grid */
+.app-grid{
+  position:absolute;inset:0;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2.5%;padding:9% 4.5% 5%;
+  align-items:center;
+}
+.app-img-wrap{
+  position:relative;height:100%;
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
+}
+.app-img{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+.zoom-btn.app-zoom{bottom:12px;right:12px;z-index:200}
 </style>
 </head>
 <body>
@@ -79,35 +142,62 @@ html,body{width:100%;height:100%;overflow:hidden;background:#EDEBE8;font-family:
 </template>
 
 <div class="slide active" data-i="0">
-  <div class="img-wrap"><img src="slides/slide-1.jpg" alt="Cover"/></div>
+  <div class="img-wrap"><img src="slides/slide-1.jpg" alt="Cover"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-1.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
 </div>
 <div class="slide" data-i="1">
-  <div class="img-wrap"><img data-src="slides/slide-2.jpg" alt="Concept"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-2.jpg" alt="Concept"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-2.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>CONCEPT</span></div>
 </div>
 <div class="slide" data-i="2">
-  <div class="img-wrap"><img data-src="slides/slide-3.jpg" alt="Logo"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-3.jpg" alt="Logo"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-3.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>LOGO</span></div>
 </div>
 <div class="slide" data-i="3">
-  <div class="img-wrap"><img data-src="slides/slide-4.jpg" alt="Logo Variations"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-4.jpg" alt="Logo Variations"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-4.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>LOGO</span></div>
 </div>
 <div class="slide" data-i="4">
-  <div class="img-wrap"><img data-src="slides/slide-5.jpg" alt="Concept Detail"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-5.jpg" alt="Concept Detail"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-5.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>CONCEPT</span></div>
 </div>
 <div class="slide" data-i="5">
-  <div class="img-wrap"><img data-src="slides/slide-6.jpg" alt="Logo System"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-6.jpg" alt="Logo System"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-6.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>LOGO VARIATIONS</span></div>
 </div>
 <div class="slide" data-i="6">
-  <div class="img-wrap"><img data-src="slides/slide-7.jpg" alt="Colors + Fonts"/></div>
+  <div class="img-wrap"><img data-src="slides/slide-7.jpg" alt="Colors + Fonts"/>
+  <button class="zoom-btn" onclick=\"openLightboxSrc('slides/slide-7.jpg',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+</div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>COLORS + FONTS</span></div>
 </div>
 <div class="slide" data-i="7">
-  <div class="img-wrap"><img data-src="slides/slide-8.jpg" alt="Application"/></div>
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>APPLICATION</span></div>
+  <div class="app-grid">
+    <div class="app-img-wrap">
+      <img class="app-img loaded" src="slides/mockup-signage.png" alt="Signage"/>
+      <button class="zoom-btn" onclick=\"openLightboxSrc('slides/mockup-signage.png',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+    </div>
+    <div class="app-img-wrap">
+      <img class="app-img loaded" src="slides/mockup-tshirt.png" alt="T-Shirt"/>
+      <button class="zoom-btn" onclick=\"openLightboxSrc('slides/mockup-tshirt.png',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+    </div>
+    <div class="app-img-wrap">
+      <img class="app-img loaded" src="slides/mockup-cap.png" alt="Cap"/>
+      <button class="zoom-btn" onclick=\"openLightboxSrc('slides/mockup-cap.png',event)\" aria-label="Zoom"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg></button>
+    </div>
+  </div>
 </div>
 <div class="slide motion-slide" data-i="8">
   <div class="hdr"><span>BRAND // CARIMBO 360</span><span>MOTION</span></div>
@@ -145,6 +235,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#EDEBE8;font-family:
 </div>
 
 <script>
+// Fix mobile vh
+function setVH(){
+  const vh=window.innerHeight*0.01;
+  document.documentElement.style.setProperty("--vh",vh+"px");
+}
+setVH();
+window.addEventListener("resize",setVH);
+window.addEventListener("orientationchange",()=>setTimeout(setVH,200));
+
 // ── Rotate overlay (JS-driven, not CSS-only) ──
 const rotateMsg = document.getElementById('rotate');
 function checkOrientation(){
@@ -243,6 +342,39 @@ document.addEventListener('touchend',e=>{
 });
 
 C.textContent='01 / 09';
+
+// Lightbox
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lightbox-img');
+function openLightbox(btn){
+  const img = btn.closest('.slide').querySelector('.img-wrap img');
+  if(!img) return;
+  lbImg.src = img.src || img.dataset.src || '';
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(e){
+  if(e && e.target===lbImg) return;
+  lb.classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
+
+
+
+
+function openLightboxSrc(src,e){if(e){e.stopPropagation();e.preventDefault();}
+  lbImg.src = src;
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+}
 </script>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="Zoom"/>
+</div>
+
 </body>
 </html>
